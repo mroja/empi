@@ -10,12 +10,12 @@
 
 template<typename T>
 class TimeFreqMap {
-	T* pointer = 0;
+	T* pointer = nullptr;
 	double* fValues = 0;
 	double* tValues = 0;
 
-	TimeFreqMap(const TimeFreqMap&); // forbidden
-	void operator=(const TimeFreqMap&); // forbidden
+	TimeFreqMap(const TimeFreqMap&) =delete;
+	void operator=(const TimeFreqMap&) =delete;
 
 public:	
 	const int cCount, fCount, tCount;
@@ -33,27 +33,27 @@ public:
 		free(tValues);
 	}
 
-	double& f(int fIndex) {
+	inline double& f(int fIndex) {
 		return fValues[fIndex];
 	}
 
-	const double& f(int fIndex) const {
+	inline const double& f(int fIndex) const {
 		return fValues[fIndex];
 	}
 
-	double& t(int tIndex) {
+	inline double& t(int tIndex) {
 		return tValues[tIndex];
 	}
 
-	const double& t(int tIndex) const {
+	inline const double& t(int tIndex) const {
 		return tValues[tIndex];
 	}
 
-	T& value(int cIndex, int fIndex, int tIndex) {
+	inline T& value(int cIndex, int fIndex, int tIndex) {
 		return pointer[(cIndex * fCount + fIndex) * tCount + tIndex];
 	}
 
-	const T& value(int cIndex, int fIndex, int tIndex) const {
+	inline const T& value(int cIndex, int fIndex, int tIndex) const {
 		return pointer[(cIndex * fCount + fIndex) * tCount + tIndex];
 	}
 };
