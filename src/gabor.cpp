@@ -48,8 +48,8 @@ part(M_SQRT2 * sqrt(s1 * s2 / A))
 { }
 
 double GaborProductEstimator::estimate(double t1, double t2) const {
-	double dt = t1 - t2;
-	return part * exp(-M_PI/A * dt * dt);
+	const double dt = t1 - t2;
+	return part * std::exp(-M_PI/A * dt * dt);
 }
 
 //------------------------------------------------------------------------------
@@ -107,8 +107,11 @@ Atoms GaborWorkspace::findBestMatch(MultichannelConstraint constraint) const {
 	double squareTotal = 0;
 	Atoms atomsTotal;
 	size_t testedCount = 0;
-	for (auto map : maps) {
-		const double s = map->s;
+	for (const auto & mapSP : maps) {
+		const GaborWorkspaceMap& map = *mapSP;
+		
+		const double s = map.s;
+		const double s2 = s * s;
 		const double amplFactor = 2.0 * sqrt(M_SQRT2 / s);
 		#ifdef _OPENMP
 		#pragma omp parallel
@@ -122,8 +125,8 @@ Atoms GaborWorkspace::findBestMatch(MultichannelConstraint constraint) const {
 			#ifdef _OPENMP
 			#pragma omp for
 			#endif
-			for (int fIndex=0; fIndex<map->fCount; ++fIndex) {
-				const double f = map->f(fIndex);
+			for (int fIndex=0; fIndex<map.fCount; ++fIndex) {
+				const double f = map.f(fIndex);
 				const bool isHighFreq = (f > 0.5 * freqNyquist);
 				// for high frequencies, one can write
 				// cos(2π(fN-Δf)(t-t₀)+φ) = (−1)^n cos(2πΔf(t-t₀)+(2πfNt₀−φ))
@@ -170,7 +173,10 @@ Atoms GaborWorkspace::findBestMatch(MultichannelConstraint constraint) const {
 				}
 			}
 		}
-		std::cout << "TESTED" << '\t' << (testedCount += map->atomCount) << std::endl;
+
+		testedCount += map.atomCount;
+		
+		std::cout << "TESTED\t" << testedCount << std::endl;
 	}
 
 	return atomsTotal;
@@ -178,7 +184,7 @@ Atoms GaborWorkspace::findBestMatch(MultichannelConstraint constraint) const {
 
 size_t GaborWorkspace::getAtomCount(void) const {
 	size_t atomCount = 0;
-	for (auto map : maps) {
+	for (const auto & map : maps) {
 		atomCount += map->atomCount;
 	}
 	return atomCount;
@@ -287,10 +293,12 @@ Workspace* GaborWorkspaceBuilder::buildWorkspace(const MultiSignal& signal) cons
 		++count;
 	}
 
+	const int count_const = count;
+
 	#ifdef _OPENMP
 	#pragma omp parallel for schedule(dynamic,1)
 	#endif
-	for (int i=0; i<count; ++i) {
+	for (int i=0; i<count_const; ++i) {
 		maps[i]->compute(signal);
 	}
 	return new GaborWorkspace(freqSampling, std::move(maps));

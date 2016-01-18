@@ -133,7 +133,8 @@ public:
 		#pragma omp critical
 		#endif
 		{
-			if (plan) fftw_destroy_plan(plan);
+			if (plan) 
+				fftw_destroy_plan(plan);
 		}
 	}
 
