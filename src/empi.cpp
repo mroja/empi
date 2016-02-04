@@ -131,7 +131,9 @@ int main(int argc, char** argv) {
 	} catch (const Exception& e) {
 		exception(e.what());
 	} catch (const std::bad_alloc& e) {
-		exception("insufficientMemory");
+		std::string msg("insufficientMemory: ");
+		msg += e.what();
+		exception(msg.c_str());
 	} catch (...) {
 		exception("internalError");
 	}
